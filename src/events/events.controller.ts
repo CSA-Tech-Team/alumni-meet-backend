@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common'
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/strategy';
 import { EventService } from './events.service';
-import { UserDecorator } from 'src/decorator'; 
+import { UserDecorator } from 'src/decorator';
 import { CreateActivityDto, UpdateActivityDto } from './dto/index';
 
 @UseGuards(JwtAuthGuard)
@@ -22,8 +22,9 @@ export class EventsController {
 
     @Post()
     async createActivity(
-        @Body() dto: CreateActivityDto,
+        @Body() dto,
     ) {
+
         return await this.eventService.createActivity(dto);
     }
 

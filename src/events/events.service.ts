@@ -4,7 +4,7 @@ import { CreateActivityDto, UpdateActivityDto } from './dto';
 
 @Injectable()
 export class EventService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async getAllActivities() {
     return this.prisma.activity.findMany({
@@ -24,6 +24,7 @@ export class EventService {
   }
 
   async createActivity(dto: CreateActivityDto) {
+
     return this.prisma.activity.create({
       data: {
         eventName: dto.eventName,
@@ -57,19 +58,16 @@ export class EventService {
   }
 
   async joinActivity(email: string, eventId: string) {
-    // Find the user's profile using the unique email
     const profile = await this.prisma.profile.findUnique({ where: { email } });
     if (!profile) {
       throw new NotFoundException('User not found');
     }
 
-    // Validate that the activity exists
     const activity = await this.prisma.activity.findUnique({ where: { id: eventId } });
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
 
-    // Check if the user has already joined the activity
     const alreadyJoined = await this.prisma.userActivity.findFirst({
       where: { userId: profile.userId, eventId },
     });
@@ -77,7 +75,6 @@ export class EventService {
       throw new HttpException('User already joined the activity', HttpStatus.BAD_REQUEST);
     }
 
-    // Create the participation record
     return this.prisma.userActivity.create({
       data: {
         userId: profile.userId,
@@ -87,13 +84,11 @@ export class EventService {
   }
 
   async leaveActivity(email: string, eventId: string) {
-    // Find the user's profile using the unique email
     const profile = await this.prisma.profile.findUnique({ where: { email } });
     if (!profile) {
       throw new NotFoundException('User not found');
     }
 
-    // Find the participation record
     const participation = await this.prisma.userActivity.findFirst({
       where: { userId: profile.userId, eventId },
     });
@@ -106,7 +101,6 @@ export class EventService {
   }
 
   async getUserActivities(email: string) {
-    // Find the user's profile using the unique email
     const profile = await this.prisma.profile.findUnique({ where: { email } });
     if (!profile) {
       throw new NotFoundException('User not found');
@@ -119,7 +113,6 @@ export class EventService {
   }
 
   async getUserSingings(email: string) {
-    // Find the user's profile using the unique email
     const profile = await this.prisma.profile.findUnique({ where: { email } });
     if (!profile) {
       throw new NotFoundException('User not found');
@@ -131,7 +124,6 @@ export class EventService {
   }
 
   async getUserGalleries(email: string) {
-    // Find the user's profile using the unique email
     const profile = await this.prisma.profile.findUnique({ where: { email } });
     if (!profile) {
       throw new NotFoundException('User not found');

@@ -169,12 +169,14 @@ export class AuthService {
     }
 
     async updateUser(email: string, updateData: UpdateUserDto) {
-        const profile = await this.prisma.profile.findUnique({ where: { email } });
+        console.log(updateData);
+        
+        const profile = await this.prisma.profile.findFirst({ where: { email } });
         if (!profile) {
             throw new HttpException("User not found", HttpStatus.NOT_FOUND);
         }
         const updatedProfile = await this.prisma.profile.update({
-            where: { email },
+            where: { id: profile.id }, // Use ID as it's unique
             data: {
                 name: updateData.name ?? profile.name,
                 gender: updateData.gender ?? profile.gender,
@@ -188,7 +190,7 @@ export class AuthService {
         });
         return { updatedProfile };
     }
-
+        
     async forgotPassword(email: string) {
         const profile = await this.prisma.profile.findUnique({
             where: {

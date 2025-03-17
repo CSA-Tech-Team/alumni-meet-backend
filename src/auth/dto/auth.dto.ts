@@ -45,7 +45,6 @@ export class AuthDtos {
   designation: string;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
   gradyear: number;
 

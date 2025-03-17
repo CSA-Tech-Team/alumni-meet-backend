@@ -61,7 +61,7 @@ export class AuthController {
             }
         }
     })
-    async signin(@Body() dto: AuthDtos) {
+    async signin(@Body() dto) {
         return this.authService.login(dto);
     }
 
@@ -91,6 +91,10 @@ export class AuthController {
 
     @Put("updateProfile")
     @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth()
+    @ApiHeader({ name: 'Authorization', description: 'Bearer <token>' })
     @ApiBody({
         schema: {
             type: 'object',
@@ -116,8 +120,9 @@ export class AuthController {
                 message: 'Updaed Profile details will be sent ',
             }
         }
-    }) async updateProfile(@Body() dto: UpdateUserDto) {
-        return this.authService.updateUser(dto.email, dto);
+    }) async updateProfile(@Body() dto,@UserDecorator() usr) {
+        
+        return this.authService.updateUser(usr.email, dto);
     }
 
     @Put("forgotPassword")
@@ -152,6 +157,10 @@ export class AuthController {
             }
         }
     })
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth()
+    @ApiHeader({ name: 'Authorization', description: 'Bearer <token>' })
     @ApiResponse({
         status: 200,
         description: 'Delete Profile',
@@ -160,8 +169,8 @@ export class AuthController {
                 message: 'User deleted Successfully ',
             }
         }
-    }) async deleteProfile(@Body() dto: DeleteUserDTO) {
-        return this.authService.deleteUser(dto.email);
+    }) async deleteProfile(@UserDecorator() usr) {
+        return this.authService.deleteUser(usr.email); // also delete the access token in the frontend
     }
 
     @Put("changePassword")
@@ -172,7 +181,6 @@ export class AuthController {
             properties: {
                 email: { type: 'string', example: 'example@gmail.com' },
                 newpassword: { type: 'string', example: 'newPass%' },
-
             }
         }
     })

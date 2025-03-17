@@ -17,7 +17,7 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('BookMarks API')
+    .setTitle('')
     .setDescription('Learning Nest js')
     .setVersion('1.0')
     .build();

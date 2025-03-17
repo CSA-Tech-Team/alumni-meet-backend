@@ -26,9 +26,12 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+    env_file:
+      - .env
     command: >
-      sh -c "npx prisma migrate deploy &&
-             npm run start:dev"
+      sh -c "until pg_isready -h postgres -p 5432; do sleep 2; done &&
+      npx prisma migrate deploy &&
+      yarn start"
 
 volumes:
   postgres_data:

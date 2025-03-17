@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String   @id @default(uuid())
+  role                    Role     @default(USER)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  email                   String   @unique
+  isCompleted             Boolean  @default(false)
+  isOTPVerified           Boolean  @default(false)
+  isChangingPassword      Boolean  @default(false)
+  otp                     String?
+  needsManualVerification Boolean  @default(false) // Added for email failure tracking
+
+  
+  singings       Singing[]
+  galleries      Gallery[]
+  userActivities UserActivity[]
+  profile        Profile?
+}
+
+model Profile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  name           String
+  email          String   @unique
+  password       String
+  gender         Gender
+  rollNumber     String
+  phoneNumber    String
+  designation    String
+  graduationYear Int
+  address        String
+  course         Course
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Added onDelete
+}
+
+model Singing {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  songDetails String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Gallery {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assetUrl  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id             String         @id @default(uuid())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  eventName      String
+  about          String
+  userActivities UserActivity[]
+}
+
+
+model UserActivity {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  eventId   String
+  userId    String
+
+  event Activity @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  SUPERUSER
+  STAFF
+  USER
+}
+
+enum Gender {
+  Male
+  Female
+  PreferNotToSay
+}
+
+enum Course {
+  SS
+  CYS
+  DS
+  TCS
+}
+
+enum FoodPreference {
+  Veg
+  NonVeg
+}

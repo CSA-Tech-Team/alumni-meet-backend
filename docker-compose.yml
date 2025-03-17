@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: alumniregistration
+    restart: always
+    environment:
+      POSTGRES_USER: alumni
+      POSTGRES_PASSWORD: secpass
+      POSTGRES_DB: alumniregistration
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./
+    container_name: nest_backend
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://alumni:secpass@postgres:5432/alumniregistration
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: >
+      sh -c "npx prisma migrate deploy &&
+             npm run start:dev"
+
+volumes:
+  postgres_data:

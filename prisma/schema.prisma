@@ -19,11 +19,11 @@ model User {
   otp                     String?
   needsManualVerification Boolean  @default(false) // Added for email failure tracking
 
-  
   singings       Singing[]
   galleries      Gallery[]
   userActivities UserActivity[]
   profile        Profile?
+  foodPreference FoodPreference?
 }
 
 model Profile {
@@ -71,7 +71,6 @@ model Activity {
   about          String
   userActivities UserActivity[]
 }
-
 
 model UserActivity {
   id        String   @id @default(uuid())

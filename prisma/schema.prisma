@@ -96,10 +96,11 @@ enum Gender {
 }
 
 enum Course {
-  SS
-  CYS
-  DS
-  TCS
+  SOFTWARESYSTEMS
+  CYBERSECURITY
+  DATASCIENCE
+  THEORETICALCOMPUTERSCIENCE
+  APPLIEDMATHEMATICS
 }
 
 enum FoodPreference {

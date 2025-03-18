@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
 import { ApiProperty } from '@nestjs/swagger';
 import { Course, Gender, Role } from "@prisma/client";
 
@@ -46,6 +46,7 @@ export class AuthDtos {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsInt()
   gradyear: number;
 
   @ApiProperty()

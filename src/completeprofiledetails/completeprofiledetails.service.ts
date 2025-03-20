@@ -19,16 +19,34 @@ export class CompleteprofiledetailsService {
             throw new HttpException(`No user with the mail id:${email} is found.`, HttpStatus.NOT_FOUND)
         }
 
-        await this.prisma.user.update({
+
+        await this.prisma.profile.update({
             where: {
                 email
             },
             data: {
-                foodPreference: dto.foodPreference
+                gender: dto.gender,
+                address: dto.addr,
+                course: dto.course,
+                designation: dto.designation,
+                graduationYear: dto.gradyear,
+                phoneNumber: dto.phonenumber,
+                rollNumber: dto.rollno,
+                userId: usr.id
             }
         })
 
-        return { message: "Food preference updated successfully" }
+        const user = await this.prisma.user.update({
+            where: {
+                email
+            },
+            data: {
+                foodPreference: dto.foodPreference,
+                isCompleted: true
+            }
+        })
+
+        return { message: "Food preference updated successfully", isProfileComplete: user.isCompleted }
     }
 
     async getFoodPrefernceCount() {
@@ -80,6 +98,6 @@ export class CompleteprofiledetailsService {
         return { gradYearCount }
     }
 
-    
+
 
 }

@@ -42,8 +42,10 @@ export class AuthService {
 
         const isPasswordValid = await argon.verify(profile.password, dto.password);
         if (!isPasswordValid) throw new UnauthorizedException("Incorrect password");
-
-        return this.signToken({ userId: profile.id, email: profile.email, name: profile.name, rollno: profile.rollNumber, role: user.role });
+        if (!profile.rollNumber) {
+            return this.signToken({ userId: profile.id, email: profile.email, name: profile.name, rollno: "null", role: user.role, isProfileCompleted: user.isCompleted });
+        }
+        return this.signToken({ userId: profile.id, email: profile.email, name: profile.name, rollno: profile.rollNumber, role: user.role, isProfileCompleted: user.isCompleted });
     }
 
     async signup(dto: AuthDtos) {
@@ -70,13 +72,13 @@ export class AuthService {
                     name: dto.name,
                     email: dto.email,
                     password: hashedPassword,
-                    gender: dto.gender,
-                    rollNumber: dto.rollno,
-                    phoneNumber: dto.phonenumber,
-                    designation: dto.designation,
-                    graduationYear: dto.gradyear,
-                    address: dto.addr,
-                    course: dto.course
+                    // gender: dto.gender,
+                    // rollNumber: dto.rollno,
+                    // phoneNumber: dto.phonenumber,
+                    // designation: dto.designation,
+                    // graduationYear: dto.gradyear,
+                    // address: dto.addr,
+                    // course: dto.course
                 }
             });
 
@@ -84,7 +86,15 @@ export class AuthService {
         });
 
         await this.sendMailWithRetry(dto.email, otp, 3);
-        return { message: "OTP sent to email for verification", profile: transactionResult.profile };
+        return { message: "OTP sent to email for verification", profile: transactionResult.profile, isProfileCompleted: transactionResult.newUser.isCompleted };
+    }
+
+    async getUserDetails(email: string) {
+        return this.prisma.user.findUnique({
+            where: {
+                email
+            }
+        })
     }
 
     async verifyOTP(dto: VerifyOTPDTO) {
@@ -107,10 +117,14 @@ export class AuthService {
         ]);
 
         if (!userProfile) throw new HttpException("Profile not found", 404);
-        return this.signToken({ userId: userProfile.id, email: userProfile.email, name: userProfile.name, rollno: userProfile.rollNumber, role: user.role });
+        // returns a string as "null" when no roll no is found
+        if (!userProfile.rollNumber) {
+            return this.signToken({ userId: userProfile.id, email: userProfile.email, name: userProfile.name, rollno: "null", role: user.role, isProfileCompleted: user.isCompleted });
+        }
+        return this.signToken({ userId: userProfile.id, email: userProfile.email, name: userProfile.name, rollno: userProfile.rollNumber, role: user.role, isProfileCompleted: user.isCompleted });
     }
 
-    private async signToken(payload: { userId: string; email: string, name: string, rollno: string, role: Role }): Promise<{ access_token: string }> {
+    private async signToken(payload: { userId: string; email: string, name: string, rollno: string, role: Role, isProfileCompleted: boolean }): Promise<{ access_token: string, isProfileCompleted: boolean }> {
         const jwtSecret = this.config.get<string>("JWT_SECRET");
         if (!jwtSecret) throw new Error("JWT_SECRET is not set");
 
@@ -118,7 +132,7 @@ export class AuthService {
             { sub: payload.userId, email: payload.email, name: payload.name, rollno: payload.rollno, role: payload.role },
             { expiresIn: "7d", secret: jwtSecret }
         );
-        return { access_token: token };
+        return { access_token: token, isProfileCompleted: payload.isProfileCompleted };
     }
 
     private async sendMailWithRetry(email: string, otp: string, maxRetries: number) {
@@ -169,8 +183,7 @@ export class AuthService {
     }
 
     async updateUser(email: string, updateData: UpdateUserDto) {
-        console.log(updateData);
-        
+
         const profile = await this.prisma.profile.findFirst({ where: { email } });
         if (!profile) {
             throw new HttpException("User not found", HttpStatus.NOT_FOUND);
@@ -190,7 +203,7 @@ export class AuthService {
         });
         return { updatedProfile };
     }
-        
+
     async forgotPassword(email: string) {
         const profile = await this.prisma.profile.findUnique({
             where: {

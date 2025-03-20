@@ -19,45 +19,45 @@ export class AuthDtos {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  gender: Gender;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // gender: Gender;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   role: Role;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  rollno: string;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // rollno: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  phonenumber: string;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // phonenumber: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  designation: string;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // designation: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsInt()
-  gradyear: number;
+  // @ApiProperty()
+  // @IsNotEmpty()
+  // @IsInt()
+  // gradyear: number;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  addr: string;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // addr: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  course: Course;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // course: Course;
 }
 
 export class VerifyOTPDTO {
@@ -99,12 +99,18 @@ export class DeleteUserDTO {
 
 export class ForgotPasswordDTO {
   @ApiProperty()
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
 }
 
+
 export class ChangePasswordDTO {
-  @ApiProperty()
+  @IsEmail({}, { message: 'A valid email is required' })
   email: string;
-  @ApiProperty()
+
+
+
+  @IsNotEmpty({ message: 'New password is required' })
   newpassword: string;
 }

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { ApiBody, ApiResponse, ApiTags, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { AuthService } from "./auth.service";
-import { AuthDtos, VerifyEmailDTO, VerifyOTPDTO, UpdateUserDto, DeleteUserDTO, ChangePasswordDTO } from "./dto";
+import { AuthDtos, VerifyEmailDTO, VerifyOTPDTO, UpdateUserDto, DeleteUserDTO, ChangePasswordDTO, ForgotPasswordDTO } from "./dto";
 import { JwtAuthGuard } from "./strategy";
 import { UserDecorator } from "src/decorator";
 
@@ -17,14 +17,7 @@ export class AuthController {
             properties: {
                 email: { type: 'string', example: 'aklamaash17@gmail.com' },
                 password: { type: 'string', example: 'Akla123%' },
-                name: { type: 'string', example: 'Mohamed Aklamaash' },
-                addr: { type: 'string', example: 'Coimbatore, Tamil Nadu' },
-                course: { type: 'string', example: 'DS' },
-                designation: { type: 'string', example: 'Student' },
-                gender: { type: 'string', example: 'Male' },
-                gradyear: { type: 'number', example: 2027 },
-                rollno: { type: 'string', example: '21MDS001' },
-                phonenumber: { type: 'string', example: '9876543210' }
+                name: { type: 'string', example: 'Mohamed Aklamaash' }
             }
         }
     })
@@ -57,7 +50,8 @@ export class AuthController {
         schema: {
             example: {
                 message: 'Signin Successful',
-                access_token: "64hexstring"
+                access_token: "64hexstring",
+                isProfileCompleted: false
             }
         }
     })
@@ -82,48 +76,42 @@ export class AuthController {
         schema: {
             example: {
                 message: 'VerifyOTP Successful',
-                access_token: "64hexstring"
+                access_token: "64hexstring",
+                isProfileCompleted: false
             }
         }
     }) async verifyOtp(@Body() dto: VerifyOTPDTO) {
         return this.authService.verifyOTP(dto);
     }
 
-    @Put("updateProfile")
-    @HttpCode(HttpStatus.OK)
-    @UseGuards(JwtAuthGuard)
-    @HttpCode(HttpStatus.OK)
-    @ApiBearerAuth()
-    @ApiHeader({ name: 'Authorization', description: 'Bearer <token>' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                email: { type: 'string', example: 'aklamaash17@gmail.com' },
-                password: { type: 'string', example: 'Akla123%' },
-                name: { type: 'string', example: 'Mohamed Aklamaash' },
-                addr: { type: 'string', example: 'Coimbatore, Tamil Nadu' },
-                course: { type: 'string', example: 'DS' },
-                designation: { type: 'string', example: 'Student' },
-                gender: { type: 'string', example: 'Male' },
-                gradyear: { type: 'number', example: 2027 },
-                rollno: { type: 'string', example: '21MDS001' },
-                phonenumber: { type: 'string', example: '9876543210' }
-            }
-        }
-    })
-    @ApiResponse({
-        status: 200,
-        description: 'User is updated successfully',
-        schema: {
-            example: {
-                message: 'Updaed Profile details will be sent ',
-            }
-        }
-    }) async updateProfile(@Body() dto,@UserDecorator() usr) {
-        
-        return this.authService.updateUser(usr.email, dto);
-    }
+    // @Put("updateProfile")
+    // @HttpCode(HttpStatus.OK)
+    // @UseGuards(JwtAuthGuard)
+    // @HttpCode(HttpStatus.OK)
+    // @ApiBearerAuth()
+    // @ApiHeader({ name: 'Authorization', description: 'Bearer <token>' })
+    // @ApiBody({
+    //     schema: {
+    //         type: 'object',
+    //         properties: {
+    //             email: { type: 'string', example: 'aklamaash17@gmail.com' },
+    //             password: { type: 'string', example: 'Akla123%' },
+    //             name: { type: 'string', example: 'Mohamed Aklamaash' }
+    //         }
+    //     }
+    // })
+    // @ApiResponse({
+    //     status: 200,
+    //     description: 'User is updated successfully',
+    //     schema: {
+    //         example: {
+    //             message: 'Updaed Profile details will be sent ',
+    //         }
+    //     }
+    // }) async updateProfile(@Body() dto, @UserDecorator() usr) {
+
+    //     return this.authService.updateUser(usr.email, dto);
+    // }
 
     @Put("forgotPassword")
     @HttpCode(HttpStatus.OK)
@@ -140,10 +128,11 @@ export class AuthController {
         description: 'Forgot Password',
         schema: {
             example: {
-                message: 'Verification OTP will be sent ',
+                message: 'Verification OTP will be sent',
             }
         }
-    }) async forgotPassword(@Body() dto: UpdateUserDto) {
+    }) async forgotPassword(@Body() dto: ForgotPasswordDTO) {
+
         return this.authService.forgotPassword(dto.email);
     }
 
@@ -192,7 +181,7 @@ export class AuthController {
                 message: 'Password Updated Successfully ',
             }
         }
-    }) async changePassword(@Body() dto: ChangePasswordDTO) {
+    }) async changePassword(@Body() dto: ChangePasswordDTO) {        
         return this.authService.changePassword(dto);
     }
 
@@ -213,11 +202,14 @@ export class AuthController {
                     rollno: '21MDS001',
                     role: 'USER',
                     iat: 1742034845,
-                    exp: 1742639645
+                    exp: 1742639645,
+                    isProfileComplete: true
                 }
             }
         }
     }) async getCurrUser(@UserDecorator() usr) {
+        const u = await this.authService.getUserDetails(usr.email)
+        usr.isProfileCompleted = u?.isCompleted
         return { user: usr };
     }
 }

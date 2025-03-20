@@ -15,7 +15,13 @@ export class CompleteprofiledetailsService {
             }
         })
 
-        if (!usr) {
+        const profile = await this.prisma.profile.findUnique({
+            where: {
+                email
+            }
+        })
+
+        if (!usr || !profile) {
             throw new HttpException(`No user with the mail id:${email} is found.`, HttpStatus.NOT_FOUND)
         }
 
@@ -25,14 +31,14 @@ export class CompleteprofiledetailsService {
                 email
             },
             data: {
-                gender: dto.gender,
-                address: dto.addr,
-                course: dto.course,
-                designation: dto.designation,
-                graduationYear: dto.gradyear,
-                phoneNumber: dto.phonenumber,
-                rollNumber: dto.rollno,
-                userId: usr.id
+                gender: dto.gender || profile.gender,
+                address: dto.addr || profile.address,
+                course: dto.course || profile.course,
+                designation: dto.designation || profile.designation,
+                graduationYear: dto.gradyear || profile.graduationYear,
+                phoneNumber: dto.phonenumber || profile.phoneNumber,
+                rollNumber: dto.rollno || profile.rollNumber,
+                userId: usr.id || profile.userId
             }
         })
 
@@ -46,7 +52,7 @@ export class CompleteprofiledetailsService {
             }
         })
 
-        return { message: "Food preference updated successfully", isProfileComplete: user.isCompleted }
+        return { message: "Profile updated successfully", isProfileComplete: user.isCompleted }
     }
 
     async getFoodPrefernceCount() {

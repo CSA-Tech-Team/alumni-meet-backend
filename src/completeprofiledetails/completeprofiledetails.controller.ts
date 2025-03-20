@@ -10,20 +10,36 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 @ApiBearerAuth() // Indicates that endpoints require JWT authentication
 @Controller('completeprofiledetails')
 export class CompleteprofiledetailsController {
-  constructor(private readonly completeprofiledetailsService: CompleteprofiledetailsService) {}
+  constructor(private readonly completeprofiledetailsService: CompleteprofiledetailsService) { }
 
   @Put('')
-  @ApiOperation({ summary: 'Complete a user profile' })
-  @ApiBody({ type: ProfileCompleteDTO }) 
+  @ApiOperation({ summary: 'Complete a user profile. Bearer token is required in the header.' })
+  @ApiBody({
+    description: 'Profile completion object',
+    type: "object",
+    schema: {
+      example: {
+        "foodPreference": "NonVeg",
+        "addr": "Coimbatore, Tamil Nadu",
+        "course": "DATASCIENCE",
+        "designation": "Student",
+        "gender": "Male",
+        "gradyear": 2027,
+        "rollno": "21MDS001",
+        "phonenumber": "9876543210"
+      }
+    }
+  })
   @ApiResponse({ status: 200, description: 'Profile successfully updated' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
   @ApiResponse({ status: 400, description: 'Bad Request - Invalid input data' })
   async completeProfile(
-    @UserDecorator() usr, 
+    @UserDecorator() usr,
     @Body() dto: ProfileCompleteDTO,
   ) {
     return this.completeprofiledetailsService.completeProfile(usr.email, dto);
   }
+
 
   @Get('foodPreferenceCount')
   @ApiOperation({ summary: 'Get count of users by food preference' })

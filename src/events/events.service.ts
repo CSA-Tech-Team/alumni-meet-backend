@@ -47,6 +47,10 @@ export class EventService {
     });
   }
 
+  async getAllEvents() {
+    return this.prisma.activity.findMany({})
+  }
+
   async deleteActivity(id: string) {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity) {

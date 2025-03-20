@@ -193,6 +193,10 @@ export class EventsController {
         return await this.eventService.deleteActivity(id);
     }
 
+    @Get("/allevents")
+    async getAllUsers() {
+        return this.eventService.getAllActivities()
+    }
     // POST /events/:id/join
     @Post(':id/join')
     @ApiOperation({ summary: 'Join an event using the provided event ID. Pass access token as header.' })

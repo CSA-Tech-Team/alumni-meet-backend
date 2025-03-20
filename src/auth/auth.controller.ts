@@ -162,6 +162,11 @@ export class AuthController {
         return this.authService.deleteUser(usr.email); // also delete the access token in the frontend
     }
 
+    @Get("allusers")
+    async getAllUsers() {
+        return this.authService.getAllUsres()
+    }
+
     @Put("changePassword")
     @HttpCode(HttpStatus.OK)
     @ApiBody({
@@ -181,7 +186,7 @@ export class AuthController {
                 message: 'Password Updated Successfully ',
             }
         }
-    }) async changePassword(@Body() dto: ChangePasswordDTO) {        
+    }) async changePassword(@Body() dto: ChangePasswordDTO) {
         return this.authService.changePassword(dto);
     }
 

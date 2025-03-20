@@ -248,6 +248,14 @@ export class AuthService {
         return { message: "Forgot Password Process initialized otp sent", usr, profile }
     }
 
+    async getAllUsres() {
+        return this.prisma.user.findMany({
+            include: {
+                profile: true
+            }
+        })
+    }
+
     async changePassword(dto: ChangePasswordDTO) {
         const profile = await this.prisma.profile.findUnique({
             where: {

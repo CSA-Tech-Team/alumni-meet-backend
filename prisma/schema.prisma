@@ -19,11 +19,11 @@ model User {
   otp                     String?
   needsManualVerification Boolean  @default(false) // Added for email failure tracking
 
-  singings       Singing[]
-  galleries      Gallery[]
-  userActivities UserActivity[]
-  profile        Profile?
-  foodPreference FoodPreference?
+  activityDetails ActivityDetails[]
+  galleries       Gallery[]
+  userActivities  UserActivity[]
+  profile         Profile?
+  foodPreference  FoodPreference?
 }
 
 model Profile {
@@ -46,13 +46,19 @@ model Profile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Added onDelete
 }
 
-model Singing {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  songDetails String
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model ActivityDetails {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Events
+
+  songDetails String?
+  topic       String?
+  needKaroke  Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Gallery {
@@ -68,7 +74,7 @@ model Activity {
   id             String         @id @default(uuid())
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-  eventName      String
+  eventName      String         @unique
   about          String
   userActivities UserActivity[]
 }
@@ -107,4 +113,11 @@ enum Course {
 enum FoodPreference {
   Veg
   NonVeg
+}
+
+enum Events {
+  Singing
+  Dancing
+  Musical_Chair
+  Memories_Sharing
 }

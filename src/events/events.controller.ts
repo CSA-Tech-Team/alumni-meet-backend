@@ -11,7 +11,8 @@ import {
 import { JwtAuthGuard } from 'src/auth/strategy';
 import { EventService } from './events.service';
 import { UserDecorator } from 'src/decorator';
-import { CreateActivityDto, UpdateActivityDto } from './dto/index';
+import { CreateActivityDto, GetActivityDetailsDTO, UpdateActivityDto } from './dto/index';
+import { User } from '@prisma/client';
 
 @ApiTags('events')
 @ApiBearerAuth()
@@ -21,6 +22,88 @@ export class EventsController {
     constructor(private readonly eventService: EventService) { }
 
     // GET /events
+
+    // GET /events/user/activities
+    @Get('user/activities')
+    @ApiOperation({ summary: 'Retrieve all events that the user has joined. Pass access token as header.' })
+    @ApiResponse({
+        status: 200,
+        description: 'List of events the user has joined',
+        schema: {
+            example: [
+                {
+                    "id": "1abe000e-5a9c-4b9f-9b3f-45e37166fe56",
+                    "createdAt": "2025-03-20T05:45:59.678Z",
+                    "updatedAt": "2025-03-20T05:45:59.678Z",
+                    "eventName": "Singing",
+                    "about": "This is a Singing Event where alumnis can interact with others by singing.",
+                    "userActivities": [
+                        {
+                            "id": "cf677f8d-a972-4ca8-9f05-c5d6ba037788",
+                            "createdAt": "2025-03-20T05:47:58.982Z",
+                            "updatedAt": "2025-03-20T05:47:58.982Z",
+                            "eventId": "1abe000e-5a9c-4b9f-9b3f-45e37166fe56",
+                            "userId": "9f7375ef-fa76-447c-807f-bba07ff27692"
+                        }
+                    ]
+                }
+            ]
+        }
+    })
+    async getUserActivities(@UserDecorator() user) {
+        return await this.eventService.getUserActivities(user.email);
+    }
+
+    @Get("/eventmemberscount")
+    async getConsolidatedEventCount() {
+        return this.eventService.getConsolidatedEventCount()
+    }
+
+    // GET /events/user/singings
+    @Get('user/singings')
+    @ApiOperation({ summary: 'Retrieve all singing events associated with the user. Pass access token as header.' })
+    @ApiResponse({
+        status: 200,
+        description: 'List of singing events',
+        schema: {
+            example: [
+                {
+                    "id": "1",
+                    "title": "Singing Event",
+                    "details": "Details about the singing event"
+                }
+            ]
+        }
+    })
+    async getUserSingings(@UserDecorator() user) {
+        return await this.eventService.getUserSingings(user.email);
+    }
+
+
+    @Post("user/getActivitydetails")
+    async getActivityDetails(@UserDecorator() usr: User, @Body() dto: GetActivityDetailsDTO) {
+        return this.eventService.getActivityDetails(usr.email, dto)
+    }
+
+    @Get('user/galleries')
+    @ApiOperation({ summary: 'Retrieve all gallery events associated with the user. Pass access token as header.' })
+    @ApiResponse({
+        status: 200,
+        description: 'List of gallery events',
+        schema: {
+            example: [
+                {
+                    "id": "1",
+                    "title": "Gallery 1",
+                    "images": ["img1.png", "img2.png"]
+                }
+            ]
+        }
+    })
+    async getUserGalleries(@UserDecorator() user) {
+        return await this.eventService.getUserGalleries(user.email);
+    }
+
     @Get()
     @ApiOperation({ summary: 'Retrieve all events with their user activities' })
     @ApiResponse({
@@ -246,74 +329,5 @@ export class EventsController {
         return await this.eventService.leaveActivity(user.email, eventId);
     }
 
-    // GET /events/user/activities
-    @Get('user/activities')
-    @ApiOperation({ summary: 'Retrieve all events that the user has joined. Pass access token as header.' })
-    @ApiResponse({
-        status: 200,
-        description: 'List of events the user has joined',
-        schema: {
-            example: [
-                {
-                    "id": "1abe000e-5a9c-4b9f-9b3f-45e37166fe56",
-                    "createdAt": "2025-03-20T05:45:59.678Z",
-                    "updatedAt": "2025-03-20T05:45:59.678Z",
-                    "eventName": "Singing",
-                    "about": "This is a Singing Event where alumnis can interact with others by singing.",
-                    "userActivities": [
-                        {
-                            "id": "cf677f8d-a972-4ca8-9f05-c5d6ba037788",
-                            "createdAt": "2025-03-20T05:47:58.982Z",
-                            "updatedAt": "2025-03-20T05:47:58.982Z",
-                            "eventId": "1abe000e-5a9c-4b9f-9b3f-45e37166fe56",
-                            "userId": "9f7375ef-fa76-447c-807f-bba07ff27692"
-                        }
-                    ]
-                }
-            ]
-        }
-    })
-    async getUserActivities(@UserDecorator() user) {
-        return await this.eventService.getUserActivities(user.email);
-    }
 
-    // GET /events/user/singings
-    @Get('user/singings')
-    @ApiOperation({ summary: 'Retrieve all singing events associated with the user. Pass access token as header.' })
-    @ApiResponse({
-        status: 200,
-        description: 'List of singing events',
-        schema: {
-            example: [
-                {
-                    "id": "1",
-                    "title": "Singing Event",
-                    "details": "Details about the singing event"
-                }
-            ]
-        }
-    })
-    async getUserSingings(@UserDecorator() user) {
-        return await this.eventService.getUserSingings(user.email);
-    }
-
-    // GET /events/user/galleries
-    @Get('user/galleries')
-    @ApiOperation({ summary: 'Retrieve all gallery events associated with the user. Pass access token as header.' })
-    @ApiResponse({
-        status: 200,
-        description: 'List of gallery events',
-        schema: {
-            example: [
-                {
-                    "id": "1",
-                    "title": "Gallery 1",
-                    "images": ["img1.png", "img2.png"]
-                }
-            ]
-        }
-    })
-    async getUserGalleries(@UserDecorator() user) {
-        return await this.eventService.getUserGalleries(user.email);
-    }
 }

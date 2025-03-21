@@ -1,9 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Events } from "@prisma/client";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateActivityDto {
     @IsString()
     @IsNotEmpty()
-    eventName: string;
+    eventName: Events;
 
     @IsString()
     @IsNotEmpty()
@@ -14,11 +15,29 @@ export class UpdateActivityDto {
     @IsString()
     @IsNotEmpty()
     @IsOptional()
-    eventName?: string;
+    eventName?: Events;
 
     @IsString()
     @IsNotEmpty()
     @IsOptional()
     about?: string;
+}
+
+export class GetActivityDetailsDTO {
+    @IsString()
+    @IsNotEmpty()
+    event: Events
+
+    @IsString()
+    @IsOptional()
+    songDetails?: string
+
+    @IsString()
+    @IsOptional()
+    topic?: string;
+
+    @IsBoolean()
+    @IsOptional()
+    needKaroke?: boolean;
 }
 

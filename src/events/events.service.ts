@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateActivityDto, UpdateActivityDto } from './dto';
+import { CreateActivityDto, GetActivityDetailsDTO, UpdateActivityDto } from './dto';
+import { Events } from '@prisma/client';
 
 @Injectable()
 export class EventService {
@@ -24,7 +25,9 @@ export class EventService {
   }
 
   async createActivity(dto: CreateActivityDto) {
-
+    if (!(dto.eventName in Events)) {
+      throw new HttpException('Event name not found in enum', HttpStatus.BAD_REQUEST);
+    }
     return this.prisma.activity.create({
       data: {
         eventName: dto.eventName,
@@ -37,6 +40,9 @@ export class EventService {
     const activity = await this.prisma.activity.findUnique({ where: { id } });
     if (!activity) {
       throw new NotFoundException('Activity not found');
+    }
+    if (dto.eventName !== undefined && !(dto.eventName in Events)) {
+      throw new HttpException('Event name not found in enum', HttpStatus.BAD_REQUEST);
     }
     return this.prisma.activity.update({
       where: { id },
@@ -110,10 +116,19 @@ export class EventService {
       throw new NotFoundException('User not found');
     }
 
-    return this.prisma.userActivity.findMany({
+    const joinedActivities = await this.prisma.userActivity.findMany({
       where: { userId: profile.userId },
       include: { event: true },
     });
+
+    const addedActivities = await this.prisma.activityDetails.findMany({
+      where: { userId: profile.userId },
+    });
+
+    return {
+      joinedActivities,
+      addedActivities,
+    };
   }
 
   async getUserSingings(email: string) {
@@ -122,9 +137,50 @@ export class EventService {
       throw new NotFoundException('User not found');
     }
 
-    return this.prisma.singing.findMany({
+    return this.prisma.activityDetails.findMany({
       where: { userId: profile.userId },
     });
+  }
+
+  async getConsolidatedEventCount() {
+    const groupCounts = await this.prisma.activityDetails.groupBy({
+      by: ['event'],
+      _count: { id: true },
+    });
+
+    const consolidatedCounts: Record<Events, number> = {} as Record<Events, number>;
+
+    Object.values(Events).forEach((event: Events) => {
+      const found = groupCounts.find((entry) => entry.event === event);
+      consolidatedCounts[event] = found?._count.id ?? 0;
+    });
+
+    return consolidatedCounts;
+  }
+
+  async getActivityDetails(email: string, activityData: GetActivityDetailsDTO) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { email },
+      select: { userId: true }
+    });
+
+    if (!profile) {
+      throw new NotFoundException('User not found');
+    }
+
+    const newActivity = await this.prisma.activityDetails.create({
+      data: {
+        event: activityData.event,
+        songDetails: activityData.songDetails,
+        topic: activityData.topic,
+        needKaroke: activityData.needKaroke ?? false,
+        user: {
+          connect: { id: profile.userId }
+        }
+      }
+    });
+
+    return newActivity;
   }
 
   async getUserGalleries(email: string) {

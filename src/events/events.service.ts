@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateActivityDto, GetActivityDetailsDTO, UpdateActivityDto } from './dto';
+import { CreateActivityDto, GetActivityDetailsDTO, postAGallertPicDTO, UpdateActivityDto } from './dto';
 import { Events } from '@prisma/client';
 
 @Injectable()
@@ -181,6 +181,44 @@ export class EventService {
     });
 
     return newActivity;
+  }
+
+  async postAGallertPic(email: string, dto: postAGallertPicDTO) {
+    const usr = await this.prisma.user.findUnique({ where: { email } });
+    if (!usr) {
+      throw new NotFoundException('User not found');
+    }
+
+    const gallery = await this.prisma.gallery.create({
+      data: {
+        assetUrl: dto.imageUrl,
+        user: {
+          connect: {
+            id: usr.id
+          }
+        }
+      }
+    })
+
+    return { gallery }
+
+  }
+
+  async getGalleryImagesWithUserName() {
+    const galleries = await this.prisma.gallery.findMany({
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+
+    return galleries.map((gallery) => ({
+      assetUrl: gallery.assetUrl,
+      postedBy: gallery.user.profile ? gallery.user.profile.name : 'Unknown',
+    }));
   }
 
   async getUserGalleries(email: string) {

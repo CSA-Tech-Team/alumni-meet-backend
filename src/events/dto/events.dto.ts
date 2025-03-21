@@ -41,3 +41,9 @@ export class GetActivityDetailsDTO {
     needKaroke?: boolean;
 }
 
+export class postAGallertPicDTO {
+    @IsString()
+    @IsNotEmpty()
+    imageUrl: string
+}
+

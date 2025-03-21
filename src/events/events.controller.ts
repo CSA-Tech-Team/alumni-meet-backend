@@ -11,7 +11,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/strategy';
 import { EventService } from './events.service';
 import { UserDecorator } from 'src/decorator';
-import { CreateActivityDto, GetActivityDetailsDTO, UpdateActivityDto } from './dto/index';
+import { CreateActivityDto, GetActivityDetailsDTO, postAGallertPicDTO, UpdateActivityDto } from './dto/index';
 import { User } from '@prisma/client';
 
 @ApiTags('events')
@@ -54,12 +54,21 @@ export class EventsController {
         return await this.eventService.getUserActivities(user.email);
     }
 
-    @Get("/eventmemberscount")
+    @Get("eventmemberscount")
     async getConsolidatedEventCount() {
         return this.eventService.getConsolidatedEventCount()
     }
 
-    // GET /events/user/singings
+    @Get("getGallery")
+    async getGalleryItems() {
+        return this.eventService.getGalleryImagesWithUserName()
+    }
+
+    @Post("user/addgallerypic")
+    async postAGalleryPic(@UserDecorator() usr: User, @Body() dto: postAGallertPicDTO) {
+        return this.eventService.postAGallertPic(usr.email, dto)
+    }
+
     @Get('user/singings')
     @ApiOperation({ summary: 'Retrieve all singing events associated with the user. Pass access token as header.' })
     @ApiResponse({

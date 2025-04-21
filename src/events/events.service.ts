@@ -7,9 +7,47 @@ import { Events } from '@prisma/client';
 export class EventService {
   constructor(private readonly prisma: PrismaService) { }
 
+  async getUsersByCourse() {
+    const usersByCourse = await this.prisma.profile.groupBy({
+      by: ['course'],
+      _count: {
+        course: true,
+      },
+      where: {
+        course: {
+          not: null,
+        },
+      },
+    });
+
+    return usersByCourse.map((item) => ({
+      course: item.course,
+      count: item._count.course,
+    }));
+  }
+  
   async getAllActivities() {
     return this.prisma.activity.findMany({
-      include: { userActivities: true },
+      include: {
+        userActivities: {
+          include: {
+            user: {
+              select: {
+                email: true,
+                profile: {
+                  select: {
+                    name: true,
+                    phoneNumber: true,
+                    rollNumber: true,
+                    email: true
+                  },
+                },
+
+              }
+            },
+          },
+        },
+      },
     });
   }
 
@@ -54,7 +92,11 @@ export class EventService {
   }
 
   async getAllEvents() {
-    return this.prisma.activity.findMany({})
+    return this.prisma.activityDetails.findMany({
+      include: {
+        user: true
+      },
+    });
   }
 
   async deleteActivity(id: string) {
@@ -118,7 +160,21 @@ export class EventService {
 
     const joinedActivities = await this.prisma.userActivity.findMany({
       where: { userId: profile.userId },
-      include: { event: true },
+      include: {
+        event: true, user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+                phoneNumber: true,
+                rollNumber: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
     });
 
     const addedActivities = await this.prisma.activityDetails.findMany({
@@ -139,6 +195,9 @@ export class EventService {
 
     return this.prisma.activityDetails.findMany({
       where: { userId: profile.userId },
+      include: {
+        user: true,
+      },
     });
   }
 

@@ -16,7 +16,7 @@ import { User } from '@prisma/client';
 
 @ApiTags('events')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('events')
 export class EventsController {
     constructor(private readonly eventService: EventService) { }
@@ -24,6 +24,7 @@ export class EventsController {
     // GET /events
 
     // GET /events/user/activities
+    @UseGuards(JwtAuthGuard)
     @Get('user/activities')
     @ApiOperation({ summary: 'Retrieve all events that the user has joined. Pass access token as header.' })
     @ApiResponse({
@@ -54,6 +55,11 @@ export class EventsController {
         return await this.eventService.getUserActivities(user.email);
     }
 
+    @Get("user/course")
+    async getUsersByCourse() {
+        return this.eventService.getUsersByCourse()
+    }
+
     @Get("eventmemberscount")
     async getConsolidatedEventCount() {
         return this.eventService.getConsolidatedEventCount()
@@ -64,11 +70,13 @@ export class EventsController {
         return this.eventService.getGalleryImagesWithUserName()
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post("user/addgallerypic")
     async postAGalleryPic(@UserDecorator() usr: User, @Body() dto: postAGallertPicDTO) {
         return this.eventService.postAGallertPic(usr.email, dto)
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('user/singings')
     @ApiOperation({ summary: 'Retrieve all singing events associated with the user. Pass access token as header.' })
     @ApiResponse({
@@ -88,7 +96,7 @@ export class EventsController {
         return await this.eventService.getUserSingings(user.email);
     }
 
-
+    @UseGuards(JwtAuthGuard)
     @Post("user/getActivitydetails")
     async getActivityDetails(@UserDecorator() usr: User, @Body() dto: GetActivityDetailsDTO) {
         return this.eventService.getActivityDetails(usr.email, dto)
@@ -159,7 +167,6 @@ export class EventsController {
         return await this.eventService.getAllActivities();
     }
 
-    // GET /events/:id
     @Get(':id')
     @ApiOperation({ summary: 'Retrieve an event by its ID' })
     @ApiParam({
@@ -290,6 +297,7 @@ export class EventsController {
         return this.eventService.getAllActivities()
     }
     // POST /events/:id/join
+    @UseGuards(JwtAuthGuard)
     @Post(':id/join')
     @ApiOperation({ summary: 'Join an event using the provided event ID. Pass access token as header.' })
     @ApiParam({

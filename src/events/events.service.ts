@@ -7,6 +7,26 @@ import { Events } from '@prisma/client';
 export class EventService {
   constructor(private readonly prisma: PrismaService) { }
 
+  async getAllSongs() {
+    return this.prisma.activityDetails.findMany({
+      include: {
+        user: {
+          select: {
+            email: true,
+            profile: {
+              select: {
+                name: true,
+                phoneNumber: true,
+                rollNumber: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async getUsersByCourse() {
     const usersByCourse = await this.prisma.profile.groupBy({
       by: ['course'],
@@ -25,7 +45,7 @@ export class EventService {
       count: item._count.course,
     }));
   }
-  
+
   async getAllActivities() {
     return this.prisma.activity.findMany({
       include: {

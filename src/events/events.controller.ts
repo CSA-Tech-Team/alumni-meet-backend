@@ -21,9 +21,6 @@ import { User } from '@prisma/client';
 export class EventsController {
     constructor(private readonly eventService: EventService) { }
 
-    // GET /events
-
-    // GET /events/user/activities
     @UseGuards(JwtAuthGuard)
     @Get('user/activities')
     @ApiOperation({ summary: 'Retrieve all events that the user has joined. Pass access token as header.' })
@@ -120,7 +117,10 @@ export class EventsController {
     async getUserGalleries(@UserDecorator() user) {
         return await this.eventService.getUserGalleries(user.email);
     }
-
+    @Get('/songs')
+    async getAllSongs() {
+        return this.eventService.getAllSongs()
+    }
     @Get()
     @ApiOperation({ summary: 'Retrieve all events with their user activities' })
     @ApiResponse({

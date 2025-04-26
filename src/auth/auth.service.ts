@@ -59,10 +59,10 @@ export class AuthService {
             const newUser = await prisma.user.create({
                 data: {
                     email: dto.email,
-                    isCompleted: false,
+                    isCompleted: dto.role === "STAFF" ? true : false,
                     isOTPVerified: false,
                     otp,
-                    role: "USER"
+                    role: dto.role || "USER",
                 }
             });
 
@@ -72,13 +72,6 @@ export class AuthService {
                     name: dto.name,
                     email: dto.email,
                     password: hashedPassword,
-                    // gender: dto.gender,
-                    // rollNumber: dto.rollno,
-                    // phoneNumber: dto.phonenumber,
-                    // designation: dto.designation,
-                    // graduationYear: dto.gradyear,
-                    // address: dto.addr,
-                    // course: dto.course
                 }
             });
 
@@ -139,8 +132,33 @@ export class AuthService {
         const mailOptions = {
             from: this.config.get("SENDER_EMAIL"),
             to: email,
-            subject: "OTP Verification",
-            html: `<p>Your OTP for email verification: <strong>${otp}</strong></p>`
+            subject: "PSGCT AMCS Alumni Meet 2025—Email Verification OTP",
+            html: `
+              <div style="font-family:Arial, sans-serif; line-height:1.5; color:#333;">
+                <h2 style="color:#0052cc;">PSGCT AMC Alumni Meet 2025</h2>
+                <p>Dear Alumni,</p>
+          
+                <p>Thank you for your interest in the <strong>Applied Mathematics &amp; Computational Sciences Alumni Meet</strong> at PSG College of Technology.</p>
+          
+                <p>To complete your registration and secure your spot on August 2nd, please enter the following One-Time Password (OTP) in the verification form:</p>
+                
+                <p style="font-size:18px; font-weight:bold; margin:16px 0; text-align:center;">
+                  ${otp}
+                </p>
+                
+                <p style="font-size:0.9em; color:#555;">
+                  • This OTP is valid for 10 minutes.<br/>
+                  • Please do not share it with anyone.<br/>
+                </p>
+          
+                <p>We look forward to welcoming you back on campus!</p>
+          
+                <p>Warm regards,<br/>
+                Department of Applied Mathematics &amp; Computational Sciences<br/>
+                PSG College of Technology<br/>
+                </p>
+              </div>
+            `
         };
 
         let lastError: Error;
@@ -252,6 +270,9 @@ export class AuthService {
         return this.prisma.user.findMany({
             include: {
                 profile: true
+            },
+            where: {
+                role: "USER"
             }
         })
     }

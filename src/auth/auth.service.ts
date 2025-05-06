@@ -135,7 +135,7 @@ export class AuthService {
             subject: "PSGCT AMCS Alumni Meet 2025—Email Verification OTP",
             html: `
               <div style="font-family:Arial, sans-serif; line-height:1.5; color:#333;">
-                <h2 style="color:#0052cc;">PSGCT AMC Alumni Meet 2025</h2>
+                <h2 style="color:#0052cc;">PSGCT AMCS Alumni Meet 2025</h2>
                 <p>Dear Alumni,</p>
           
                 <p>Thank you for your interest in the <strong>Applied Mathematics &amp; Computational Sciences Alumni Meet</strong> at PSG College of Technology.</p>

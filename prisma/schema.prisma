@@ -120,4 +120,5 @@ enum Events {
   Dancing
   Musical_Chair
   Memories_Sharing
+  Anaikatti_Nature_Trip
 }
